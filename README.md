@@ -1,4 +1,4 @@
-# 🚀 Zenith - Local AI Security Scanner
+# Zenith - Local AI Security Scanner
 
 ![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)
 ![TypeScript](https://img.shields.io/badge/typescript-5.4-blue)
@@ -14,11 +14,11 @@ Zenith is a modern DevSecOps tool designed to eliminate the single biggest annoy
 
 Zenith solves this by routing potential secrets through a lightweight, 3.8-Billion parameter Neural Network (`microsoft/Phi-3-mini-4k-instruct`) **running directly on your local hardware**. It semantically analyzes the context of the code to determine if a string is a live production credential or just harmless test data—all while ensuring your code never leaves your laptop.
 
-## 🎯 Why This Project?
+## Why This Project?
 
 Alert fatigue is a massive problem in software engineering. When security tools cry wolf too often, developers start ignoring them, leading to catastrophic leaks. Zenith provides context-aware, highly accurate security auditing without compromising on privacy or execution speed.
 
-## ✨ Key Features
+## Key Features
 
 - **Local AI Secret Scanning:** Detects AWS keys, GitHub tokens, Stripe keys, and more.
 - **Context-Aware False Positive Filtration:** Uses an LLM to distinguish between `sk_live_123` and `fake_test_key`.
@@ -27,14 +27,14 @@ Alert fatigue is a massive problem in software engineering. When security tools 
 - **Live IDE Integration:** A VS Code extension connects to a local FastAPI server to highlight secrets as you type.
 - **Pre-commit Hooks:** Blocks commits containing live secrets before they ever reach Git.
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - **Core & CLI:** Python (3.10+), `click`, `rich`
 - **Machine Learning Engine:** `torch`, `transformers`, `accelerate`, `onnxruntime`
 - **Background API:** `fastapi`, `uvicorn`, `requests`
 - **IDE Extension:** TypeScript, `vscode` API, `esbuild`, `axios`
 
-## 🏗 Architecture
+## Architecture
 
 Zenith operates through modular components:
 1. **The CLI (`zenith.cli`)**: Provides manual commands like `zenith scan` and `zenith audit`.
@@ -42,7 +42,7 @@ Zenith operates through modular components:
 3. **The Extension (`zenith-vscode`)**: A TypeScript plugin that watches your keystrokes and pings the local server.
 4. **The AI Engine (`zenith.ai.inference`)**: A singleton class that caches the LLM in local memory (RAM/VRAM) to achieve sub-second inference latency.
 
-## 🚦 Prerequisites
+## Prerequisites
 
 Before installing Zenith, ensure you have the following:
 - **Python 3.10+** installed
@@ -52,7 +52,7 @@ Before installing Zenith, ensure you have the following:
   - Mac: Apple Silicon (M1/M2/M3/M4) is highly recommended for MPS acceleration.
   - Windows/Linux: Requires downloading the INT4 Quantized ONNX model manually for CPU/NPU acceleration.
 
-## 💻 Installation
+## Installation
 
 Follow these steps to set up the project locally:
 
@@ -85,7 +85,7 @@ cd ..
 
 Zenith requires **no external API keys** or environment variables for its core secret scanning because all AI inference happens 100% locally on your machine.
 
-## 🚀 Running the Project
+## Running the Project
 
 ### Command Line Interface
 
@@ -125,13 +125,13 @@ Unit tests are located in the `tests/` directory. You can run them using Python'
 python -m unittest discover -s tests
 ```
 
-## ⚠️ Warnings / Known Limitations
+## Warnings / Known Limitations
 
 - **Model Download Size:** If the AI is not running in "Mock" mode, the first time you run `--ai`, Zenith will download the `microsoft/Phi-3-mini-4k-instruct` model (~3.8GB). Ensure you have sufficient disk space and a stable internet connection.
 - **Memory Usage:** Running a 3.8B parameter model locally requires significant RAM. It is recommended to have at least 16GB of Unified Memory on Macs.
 - **Demonstration Mode:** Currently, `zenith/ai/inference.py` contains hardcoded mock logic to instantly simulate AI responses for presentation purposes without downloading the full model. To use the true AI, remove the `MOCK_SESSION` override in that file.
 
-## 🛠 Troubleshooting
+## Troubleshooting
 
 - **Error: `command not found: zenith`**
   Ensure that you ran `pip install -e .` and that your virtual environment is currently active.
@@ -140,7 +140,7 @@ python -m unittest discover -s tests
 - **Mac Users - AI Latency is slow:**
   Ensure your Python installation was compiled with ARM64 support so PyTorch can hook into the Apple MPS (Metal Performance Shaders) backend.
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 ├── zenith/                 # Core Python Package
@@ -155,7 +155,7 @@ python -m unittest discover -s tests
 └── DEMO.md                 # Live presentation script
 ```
 
-## 📄 License
+## License
 
 Currently, **no LICENSE file is included** in this repository. 
 *(Maintainer Note: Consider adding an open-source license such as MIT or Apache 2.0 to clarify usage rights for visitors and contributors).*
