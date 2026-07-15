@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "zenith"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = ["click", "rich", "onnxruntime", "requests", "fastapi", "uvicorn"]
+
+[project.scripts]
+zenith = "zenith.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["."]

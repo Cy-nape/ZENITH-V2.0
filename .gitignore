@@ -1,0 +1,19 @@
+# Environments
+.venv/
+env/
+venv/
+ENV/
+
+# Python cache & build
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Node
+node_modules/
+dist/
+

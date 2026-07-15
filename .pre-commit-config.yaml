@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: zenith-scan
+        name: Zenith Security Guard
+        entry: python -m zenith.hooks.pre_commit
+        language: system
+        stages: [pre-commit]
+        types: [text]
