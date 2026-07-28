@@ -1,79 +1,81 @@
-# 🚀 Zenith - Local AI Security Scanner
+# Zenith — Local AI Security Scanner
 
 ![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)
 ![TypeScript](https://img.shields.io/badge/typescript-5.4-blue)
 ![License](https://img.shields.io/badge/license-None-red)
 
-> **Zenith** is a blazingly fast, locally-run AI security scanner that detects hardcoded secrets and vulnerable dependencies in your codebase.
+> **Zenith** is a locally-run AI security scanner that detects hardcoded secrets and vulnerable dependencies in your codebase.
 
 ---
 
-## 📖 Overview
+## Overview
 
-Zenith is a modern DevSecOps tool designed to eliminate the single biggest annoyance of standard security scanners: **False Positives**. Traditional regex-based scanners flag every instance of the word "password" or "api_key", forcing developers to sift through hundreds of harmless mock variables and test data.
+Zenith is a DevSecOps tool built to reduce false positives in secret scanning. Traditional regex-based scanners flag every instance of strings like `password` or `api_key`, including harmless mock variables and test data. This creates alert fatigue and causes developers to ignore legitimate warnings.
 
-Zenith solves this by routing potential secrets through a lightweight, 3.8-Billion parameter Neural Network (`microsoft/Phi-3-mini-4k-instruct`) **running directly on your local hardware**. It semantically analyzes the context of the code to determine if a string is a live production credential or just harmless test data—all while ensuring your code never leaves your laptop.
+Zenith addresses this by routing potential secrets through a lightweight, 3.8-billion parameter neural network (`microsoft/Phi-3-mini-4k-instruct`) running directly on local hardware. The model analyzes the surrounding code context to determine whether a string is a live production credential or test data — without sending any code off-device.
 
-## 🎯 Why This Project?
+## Why This Project?
 
-Alert fatigue is a massive problem in software engineering. When security tools cry wolf too often, developers start ignoring them, leading to catastrophic leaks. Zenith provides context-aware, highly accurate security auditing without compromising on privacy or execution speed.
+Alert fatigue is a real problem in software security. When scanners generate too many false positives, developers stop trusting them, and real leaks go undetected. Zenith is designed to be accurate enough to take seriously, and private enough to use without policy concerns.
 
-## ✨ Key Features
+## Key Features
 
-- **Local AI Secret Scanning:** Detects AWS keys, GitHub tokens, Stripe keys, and more.
-- **Context-Aware False Positive Filtration:** Uses an LLM to distinguish between `sk_live_123` and `fake_test_key`.
-- **Hardware Accelerated:** Runs natively on Apple Silicon (MPS Neural Engine), AMD XDNA, or Intel NPU via ONNX Runtime.
-- **Dependency Vulnerability Auditing:** Cross-references `requirements.txt`, `package.json`, and other manifests against the Open Source Vulnerabilities (OSV) database to catch Critical CVEs instantly.
-- **Live IDE Integration:** A VS Code extension connects to a local FastAPI server to highlight secrets as you type.
-- **Pre-commit Hooks:** Blocks commits containing live secrets before they ever reach Git.
+- **Local AI Secret Scanning:** Detects AWS keys, GitHub tokens, Stripe keys, and other common credential formats.
+- **Context-Aware False Positive Reduction:** Uses an LLM to distinguish between a live credential and a clearly fake test value.
+- **Hardware Acceleration:** Runs natively on Apple Silicon (MPS/Neural Engine), AMD XDNA, or Intel NPU via ONNX Runtime.
+- **Dependency Vulnerability Auditing:** Cross-references `requirements.txt`, `package.json`, and other manifests against the Open Source Vulnerabilities (OSV) database to surface known CVEs.
+- **Live IDE Integration:** A VS Code extension connects to a local FastAPI server and highlights secrets as you type.
+- **Pre-commit Hooks:** Blocks commits containing live secrets before they reach Git history.
 
-## 🛠 Tech Stack
+## Tech Stack
 
-- **Core & CLI:** Python (3.10+), `click`, `rich`
+- **Core and CLI:** Python (3.10+), `click`, `rich`
 - **Machine Learning Engine:** `torch`, `transformers`, `accelerate`, `onnxruntime`
 - **Background API:** `fastapi`, `uvicorn`, `requests`
-- **IDE Extension:** TypeScript, `vscode` API, `esbuild`, `axios`
+- **IDE Extension:** TypeScript, VS Code API, `esbuild`, `axios`
 
-## 🏗 Architecture
+## Architecture
 
-Zenith operates through modular components:
-1. **The CLI (`zenith.cli`)**: Provides manual commands like `zenith scan` and `zenith audit`.
-2. **The Server (`zenith.server`)**: A background FastAPI application exposing a `/scan` endpoint.
-3. **The Extension (`zenith-vscode`)**: A TypeScript plugin that watches your keystrokes and pings the local server.
-4. **The AI Engine (`zenith.ai.inference`)**: A singleton class that caches the LLM in local memory (RAM/VRAM) to achieve sub-second inference latency.
+Zenith is composed of four modular components:
 
-## 🚦 Prerequisites
+1. **CLI (`zenith.cli`)** — Provides `zenith scan` and `zenith audit` commands for manual invocation.
+2. **Server (`zenith.server`)** — A FastAPI application that runs in the background and exposes a `/scan` endpoint.
+3. **VS Code Extension (`zenith-vscode`)** — A TypeScript plugin that monitors the active editor and sends text to the local server for analysis.
+4. **AI Engine (`zenith.ai.inference`)** — A singleton that loads and caches the LLM in local memory (RAM or VRAM) for low-latency inference.
 
-Before installing Zenith, ensure you have the following:
-- **Python 3.10+** installed
-- **Node.js 20.x** (Required only for building the VS Code extension)
-- **Git**
-- **Hardware Requirements:**
-  - Mac: Apple Silicon (M1/M2/M3/M4) is highly recommended for MPS acceleration.
-  - Windows/Linux: Requires downloading the INT4 Quantized ONNX model manually for CPU/NPU acceleration.
+## Prerequisites
 
-## 💻 Installation
+- Python 3.10 or later
+- Node.js 20.x (required only if building the VS Code extension from source)
+- Git
+- Hardware:
+  - macOS: Apple Silicon (M1/M2/M3/M4) is recommended for MPS acceleration.
+  - Windows/Linux: Requires the INT4 quantized ONNX model for CPU or NPU acceleration.
 
-Follow these steps to set up the project locally:
+## Installation
 
 **1. Clone the repository**
+
 ```bash
 git clone https://github.com/Cy-nape/ZENITH-V2.0.git
 cd ZENITH-V2.0
 ```
 
-**2. Set up the Python Environment**
+**2. Create and activate a Python virtual environment**
+
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
-**3. Install the Zenith CLI and Python Dependencies**
+**3. Install the Zenith package and its dependencies**
+
 ```bash
 pip install -e .
 ```
 
-**4. Build the VS Code Extension**
+**4. Build the VS Code extension** (optional, only needed for IDE integration)
+
 ```bash
 cd zenith-vscode
 npm install
@@ -81,85 +83,95 @@ npm run build
 cd ..
 ```
 
-## ⚙️ Environment Variables
+## Environment Variables
 
-Zenith requires **no external API keys** or environment variables for its core secret scanning because all AI inference happens 100% locally on your machine.
+Zenith requires no external API keys or environment variables. All AI inference runs locally on your machine.
 
-## 🚀 Running the Project
+## Usage
 
-### Command Line Interface
+### Command Line
 
-**1. Scan a file for secrets (Regex Only)**
+Scan a single file using regex only:
+
 ```bash
 zenith scan path/to/file.py
 ```
 
-**2. Scan a file using the Local AI Engine**
+Scan a file with AI-assisted context analysis:
+
 ```bash
 zenith scan path/to/file.py --ai --profile
 ```
 
-**3. Audit Project Dependencies**
+Audit project dependencies against the OSV database:
+
 ```bash
 zenith audit .
 ```
 
 ### Live IDE Integration
 
-To use the "as-you-type" VS Code extension:
+To run the VS Code extension in development mode:
 
-1. Start the Zenith backend server in a terminal:
+1. Start the Zenith backend server:
+
    ```bash
    python -m zenith.server
    ```
-   *(The server will start on `http://127.0.0.1:8765`)*
+
+   The server listens on `http://127.0.0.1:8765`.
+
 2. Open the `zenith-vscode` folder in VS Code.
 3. Press **F5** to launch the Extension Development Host.
-4. Open any file in the new window and type a secret (e.g., `api_key = "sk_livefake_1234567890abcdefghijklmn"`). You will immediately see a red warning underline.
+4. In the new VS Code window, open any file and type a credential-like string, for example:
 
-## 🧪 Running Tests
+   ```
+   api_key = "sk_livefake_1234567890abcdefghijklmn"
+   ```
 
-Unit tests are located in the `tests/` directory. You can run them using Python's built-in `unittest` module:
+   The extension will underline the value with a red diagnostic warning as you type.
+
+## Running Tests
+
+Unit tests are in the `tests/` directory and can be run with Python's built-in test runner:
 
 ```bash
 python -m unittest discover -s tests
 ```
 
-## ⚠️ Warnings / Known Limitations
+## Known Limitations
 
-- **Model Download Size:** If the AI is not running in "Mock" mode, the first time you run `--ai`, Zenith will download the `microsoft/Phi-3-mini-4k-instruct` model (~3.8GB). Ensure you have sufficient disk space and a stable internet connection.
-- **Memory Usage:** Running a 3.8B parameter model locally requires significant RAM. It is recommended to have at least 16GB of Unified Memory on Macs.
-- **Demonstration Mode:** Currently, `zenith/ai/inference.py` contains hardcoded mock logic to instantly simulate AI responses for presentation purposes without downloading the full model. To use the true AI, remove the `MOCK_SESSION` override in that file.
+- **Model size:** When not running in demonstration mode, the first execution of `--ai` will download the `microsoft/Phi-3-mini-4k-instruct` model (~3.8 GB). Ensure sufficient disk space and a stable network connection.
+- **Memory requirements:** Running a 3.8-billion parameter model locally requires significant RAM. At least 16 GB of unified memory is recommended on Apple Silicon devices.
+- **Demonstration mode:** `zenith/ai/inference.py` currently contains hardcoded mock logic that simulates AI responses instantly without downloading the full model. To use the real AI, remove the `MOCK_SESSION` override in that file.
 
-## 🛠 Troubleshooting
+## Troubleshooting
 
-- **Error: `command not found: zenith`**
-  Ensure that you ran `pip install -e .` and that your virtual environment is currently active.
-- **Error: `ModuleNotFoundError: No module named 'torch'`**
-  The dependencies did not install correctly. Run `pip install -r pyproject.toml` (or `pip install -e .`).
-- **Mac Users - AI Latency is slow:**
-  Ensure your Python installation was compiled with ARM64 support so PyTorch can hook into the Apple MPS (Metal Performance Shaders) backend.
+**`command not found: zenith`**
+Confirm that you ran `pip install -e .` and that your virtual environment is active.
 
-## 📂 Project Structure
+**`ModuleNotFoundError: No module named 'torch'`**
+Dependencies did not install correctly. Re-run `pip install -e .` from the project root.
+
+**Slow AI inference on Mac**
+Verify that your Python installation was compiled for ARM64 so PyTorch can use the Apple MPS (Metal Performance Shaders) backend.
+
+## Project Structure
 
 ```text
-├── zenith/                 # Core Python Package
-│   ├── ai/                 # Local LLM Inference Engine
-│   ├── scanner/            # Regex Extractors and CVE Auditing logic
-│   ├── hooks/              # Git Pre-commit Hooks
-│   ├── cli.py              # Click CLI Entrypoint
-│   └── server.py           # FastAPI Background Server
-├── zenith-vscode/          # TypeScript VS Code Extension
+.
+├── zenith/                 # Core Python package
+│   ├── ai/                 # Local LLM inference engine
+│   ├── scanner/            # Regex extractors and CVE auditing logic
+│   ├── hooks/              # Git pre-commit hook integration
+│   ├── cli.py              # Click CLI entrypoint
+│   └── server.py           # FastAPI background server
+├── zenith-vscode/          # TypeScript VS Code extension
 ├── tests/                  # Unit tests
-├── pyproject.toml          # Python package config & dependencies
-└── DEMO.md                 # Live presentation script
+├── pyproject.toml          # Python package configuration and dependencies
+└── DEMO.md                 # Live demonstration script
 ```
 
-## 📄 License
+## License
 
-Currently, **no LICENSE file is included** in this repository. 
-*(Maintainer Note: Consider adding an open-source license such as MIT or Apache 2.0 to clarify usage rights for visitors and contributors).*
-
-Test 4B Change
-
-
+No LICENSE file is currently included in this repository. Consider adding an open-source license (MIT or Apache 2.0) to clarify usage rights for contributors and visitors.
