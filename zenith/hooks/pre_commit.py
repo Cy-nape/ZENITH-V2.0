@@ -5,15 +5,19 @@ from rich.table import Table
 
 console = Console()
 
-def get_staged_diff() -> str:
+def get_staged_diff(files=None) -> str:
+    cmd = ["git", "diff", "--cached", "--unified=0"]
+    if files:
+        cmd.extend(["--"] + files)
     result = subprocess.run(
-        ["git", "diff", "--cached", "--unified=0"],
+        cmd,
         capture_output=True, text=True
     )
     return result.stdout
 
 def run():
-    diff = get_staged_diff()
+    files = sys.argv[1:]
+    diff = get_staged_diff(files)
     if not diff:
         sys.exit(0)
 

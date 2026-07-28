@@ -1,6 +1,8 @@
 import os
 import json
 import sys
+import time
+import requests
 from functools import lru_cache
 
 # Singletons to keep FastAPI hot and responsive
@@ -8,24 +10,6 @@ _GLOBAL_MODEL = None
 _GLOBAL_TOKENIZER = None
 _GLOBAL_SESSION = None
 _GLOBAL_DEVICE = None
-
-@lru_cache(maxsize=2000)
-def _cached_inference(prompt: str, code_snippet: str, is_mac: bool, match_str: str = "") -> dict:
-    # DEMO MODE: ALWAYS USE MOCK SESSION TO PREVENT DOWNLOADING 3.8B MODEL
-    analysis_text = code_snippet.lower()
-    # If the user says test, fake, mock, dummy, but it's not literally an AWS key
-    is_test = any(k in analysis_text for k in ["test", "fake", "mock", "dummy"]) and "akia" not in match_str.lower()
-    
-    if is_test:
-        reason_str = "[AST Lexical Matrix] Detected semantic test-bound wrapper. Execution vector identified as non-critical mock inject. Bypassing."
-    else:
-        reason_str = f"[Entropy Evaluator] Core anomaly detected! String entropy evaluates to high-risk production format. Confirmed Live Incident."
-        
-    return {
-        "is_live": not is_test, 
-        "confidence": 0.99,
-        "reason": reason_str
-    }
 
 def _parse_output_static(generated_text: str, code_snippet: str) -> dict:
     try:
@@ -43,14 +27,47 @@ def _parse_output_static(generated_text: str, code_snippet: str) -> dict:
             "reason": f"AI Parsing Error. Output: {generated_text[:50]}..."
         }
 
+@lru_cache(maxsize=2000)
+def _cached_inference(prompt: str, code_snippet: str, is_mac: bool, match_str: str = "") -> dict:
+    global _GLOBAL_SESSION
+    if not _GLOBAL_SESSION:
+        return {
+            "is_live": True, 
+            "confidence": 0.0, 
+            "reason": "Ollama unavailable - defaulting to flagging as live for safety"
+        }
+    
+    try:
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": _GLOBAL_SESSION,
+                "prompt": prompt,
+                "stream": False,
+                "format": "json",
+                "options": {"temperature": 0}
+            },
+            timeout=30
+        )
+        response.raise_for_status()
+        resp_json = response.json()
+        generated_text = resp_json.get("response", "")
+        return _parse_output_static(generated_text, code_snippet)
+    except Exception as e:
+        return {
+            "is_live": True, 
+            "confidence": 0.0, 
+            "reason": "Ollama unavailable - defaulting to flagging as live for safety"
+        }
+
 class ZenithClassifier:
     def __init__(self):
         self.os_type = sys.platform
         self.is_mac = self.os_type == "darwin"
         
         if self.is_mac:
-            self.model_path = "microsoft/Phi-3-mini-4k-instruct"
-            self.engine = "Apple Unified Memory (CPU Safe Mode)"
+            self.model_path = "phi3:mini"
+            self.engine = "Ollama (Phi-3-mini, Q4 quantized, local)"
         else:
             self.model_path = "models/zenith_phi3_int4.onnx"
             self.onnx_providers = ["VitisAIExecutionProvider", "OpenVINOExecutionProvider", "DmlExecutionProvider", "CPUExecutionProvider"]
@@ -59,10 +76,21 @@ class ZenithClassifier:
     def _init_session(self):
         global _GLOBAL_MODEL, _GLOBAL_TOKENIZER, _GLOBAL_SESSION, _GLOBAL_DEVICE
         if _GLOBAL_MODEL is None and _GLOBAL_SESSION is None:
-            # DEMO MODE: Pretend to load to Apple Neural Engine / ONNX without actually downloading
-            pass
-            _GLOBAL_MODEL = "MOCK_MODEL"
-            _GLOBAL_SESSION = "MOCK_SESSION"
+            _GLOBAL_MODEL = "INITIALIZING"
+            try:
+                # Check if Ollama is reachable
+                res = requests.get("http://localhost:11434/api/tags", timeout=3)
+                res.raise_for_status()
+                
+                # Warm-up request
+                requests.post(
+                    "http://localhost:11434/api/generate",
+                    json={"model": self.model_path, "prompt": "Hello", "stream": False},
+                    timeout=30
+                )
+                _GLOBAL_SESSION = self.model_path
+            except Exception as e:
+                _GLOBAL_SESSION = False
 
     def is_live_secret(self, code_snippet: str, pattern_name: str, match_str: str = "") -> dict:
         self._init_session()
@@ -75,5 +103,4 @@ Code:
 {code_snippet}
 <|assistant|>
 """
-        
         return _cached_inference(prompt, code_snippet, self.is_mac, match_str)

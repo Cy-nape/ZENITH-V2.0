@@ -17,3 +17,11 @@ dist/
 node_modules/
 dist/
 
+# Debug and Session Artifacts
+*.vsix
+*.log
+run_investigation*.py
+run_fix_tests.py
+test_ollama.py
+raw_test.py
+hook_test_temp.py

@@ -3,6 +3,7 @@
   "displayName": "Zenith AI Security Scanner",
   "description": "Real-time AI secret scanning in VS Code",
   "version": "0.1.0",
+  "publisher": "Cy-nape",
   "engines": {
     "vscode": "^1.90.0"
   },

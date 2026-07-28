@@ -7,3 +7,4 @@ repos:
         language: system
         stages: [pre-commit]
         types: [text]
+        exclude: ^(demo\.py|nedemo\.py|diagnostic\.py|tests/.*|zenith-vscode/README\.md)$

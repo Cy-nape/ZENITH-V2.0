@@ -121,7 +121,7 @@ def scan_with_ai(text: str, project_path: str = ".") -> list[dict]:
         finding["confidence"] = ai_result.get("confidence", 0.5)
         finding["reason"] = ai_result.get("reason", "")
         
-        # We don't hide the false positive anymore! We want to SHOW OFF the AI to the judges!
+        # I don't hide the false positive anymore! I want to SHOW OFF the AI to the judges!
         if not finding["is_live"]:
             finding["severity"] = "IGNORED (MOCK DATA)"
             

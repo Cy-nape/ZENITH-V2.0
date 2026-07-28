@@ -18,7 +18,7 @@ def parse_requirements_txt(filepath):
                     })
     return deps
 
-def parse_package_json(filepath):
+def parse_package_json(filepath): 
     deps = []
     if os.path.exists(filepath):
         try:

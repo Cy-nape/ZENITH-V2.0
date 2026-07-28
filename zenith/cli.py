@@ -20,17 +20,23 @@ def cli():
 
 @cli.command()
 def init_ai():
-    """Download and cache the AI model for local use."""
+    """Verify local AI model connectivity."""
     import sys
     console.print("[cyan]Initializing Zenith AI...[/cyan]")
     
     if sys.platform == "darwin":
         console.print("Detected OS: macOS. Target Hardware: Apple Neural Engine (MPS).")
-        console.print("Downloading microsoft/Phi-3-mini-4k-instruct (This will take a few minutes...)")
+        console.print("Verifying Ollama connectivity and warming up microsoft/Phi-3-mini-4k-instruct...")
         from zenith.ai.inference import ZenithClassifier
+        import zenith.ai.inference as inference_mod
         classifier = ZenithClassifier()
         classifier._init_session()
-        console.print("[green]✔ AI Model successfully downloaded and cached on your Mac![/green]")
+        
+        if inference_mod._GLOBAL_SESSION:
+            console.print("[green]✔ AI Model successfully verified and warmed up on your Mac![/green]")
+        else:
+            console.print("[red]✗ Could not reach Ollama at localhost:11434 — is it running?[/red]")
+            console.print("[yellow]Run 'ollama serve' and 'ollama pull phi3:mini' first.[/yellow]")
     else:
         console.print(f"Detected OS: {sys.platform.capitalize()}. Target Hardware: AMD XDNA / Intel NPU via ONNX.")
         console.print("To utilize AMD XDNA (Ryzen AI) or Intel NPUs, you must download the INT4 Quantized ONNX model.")
@@ -57,11 +63,9 @@ def scan(filepath, ai, profile):
     start_time = time.perf_counter()
     if ai:
         with console.status("[bold green]Engaging Neural Engine & Processing Context Vectors...[/bold green]", spinner="bouncingBar"):
-            time.sleep(1.2)
             findings = scan_with_ai(text)
     else:
         with console.status("[bold yellow]Running Legacy Regex Extraction Phase...[/bold yellow]", spinner="line"):
-            time.sleep(0.5)
             findings = scan_text(text)
             
     elapsed_ms = (time.perf_counter() - start_time) * 1000
@@ -93,7 +97,7 @@ def scan(filepath, ai, profile):
             row = [str(f['line']), sev_str, type_str, f['match']]
             if ai:
                 reasoning = f.get('reason', 'AI Component Verification Failure')
-                row.append(f"[bold italic]{reasoning}[/bold italic]" if "Active" in reasoning else f"[italic dim green]{reasoning}[/italic dim green]")
+                row.append(f"[italic dim green]{reasoning}[/italic dim green]" if "IGNORED" in f['severity'] else f"[bold italic]{reasoning}[/bold italic]")
             table.add_row(*row)
             
         console.print(table)
@@ -144,8 +148,9 @@ def audit(project_path):
     
     with console.status(f"[bold cyan]Mapping system vectors & syncing with OSV global node...[/bold cyan]", spinner="dqpb"):
         import time
-        time.sleep(2.0) # More time for the new crazy spinner!
+        start_osv = time.perf_counter()
         findings = get_vulnerabilities(project_path=project_path)
+        osv_elapsed = (time.perf_counter() - start_osv) * 1000
         
     if not findings:
         console.print("[green]✔ No vulnerabilities found in local manifest files.[/green]")
@@ -166,11 +171,13 @@ def audit(project_path):
     console.print(table)
     
     # 🤯 Adding a completely insane "Metrics Dashboard" at the bottom
+    has_critical = any(f["severity"] == "CRITICAL" for f in findings)
+    integrity_str = "[red]CRITICAL VULNERABILITIES FOUND[/red]" if has_critical else "[yellow]VULNERABILITIES FOUND[/yellow]"
+    
     metrics_text = f"""
     [bold white]Target Directory:[/bold white] [cyan]{project_path}[/cyan]
-    [bold white]OSV Global Sync Latency:[/bold white] [green]34.2 ms[/green]
-    [bold white]Environment Integrity:[/bold white] [red]COMPROMISED[/red]
-    [bold white]Hardware Accel:[/bold white] [cyan]Active (Local Session)[/cyan]
+    [bold white]OSV Global Sync Latency:[/bold white] [green]{osv_elapsed:.1f} ms[/green]
+    [bold white]Environment Integrity:[/bold white] {integrity_str}
     """
     
     console.print("\n")
