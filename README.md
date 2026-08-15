@@ -2,7 +2,6 @@
 
 ![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)
 ![TypeScript](https://img.shields.io/badge/typescript-5.4-blue)
-![License](https://img.shields.io/badge/license-None-red)
 
 > **Zenith** is a blazingly fast, locally-run AI security scanner that detects hardcoded secrets and vulnerable dependencies in your codebase.
 
